@@ -8,6 +8,7 @@ function getCityByProvince(){
             $("#list").val(msg);
             var list = eval("("+msg+")");
             var html = "";
+
             if(list.length != 0){
                 html += "<option value=''>选择城市</option>"
                 for(var i = 0;i < list.length;i++){
