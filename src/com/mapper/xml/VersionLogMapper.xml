@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mapper.VersionLogMapper">
+
+	<resultMap type="com.entity.VersionLog" id="versionLogAll">
+		<id property="id" column="id"/>
+		<result property="versionAbstract" column="versionAbstract"/>
+		<result property="title" column="title"/>
+		<result property="content" column="content"/>
+		<result property="versionNumber" column="versionNumber"/>
+		<result property="createBy" column="createBy"/>
+		<result property="createTime" column="createTime"/>
+		<result property="versionType" column="versionType"/>
+		<result property="state" column="state"/>
+		
+		<association property="role" javaType="com.entity.Role">
+			<result property="name" column="name" />
+			<result property="number" column="number" />
+		</association>
+
+        <association property="employee" javaType="com.entity.Employee">
+			<result property="roleId" column="roleId" />
+			<result property="userName" column="userName" />
+		</association>
+	</resultMap>
+
+	<!-- 查询历史版本 -->
+    <select id="listVersionLog" resultMap="versionLogAll">
+		select a.*,b.name from version_log a left join roles b on a.createBy = b.number where a.state = 1 and a.versionType = 1
+		<if test="title != null">
+			and title like #{title}
+		</if>
+		<if test="versionNumber != null">
+			and versionNumber = #{versionNumber}
+		</if>
+		<if test="versionAbstract != null">
+			and versionAbstract = #{versionAbstract}
+		</if>
+		order by createTime desc limit #{page.beginRownum},#{page.pageRows}
+	</select>
+	
+	<!-- 查询历史总行数 -->
+	<select id="selTotalRows" resultType="int">
+		select count(id) from version_log where state = 1 and versionType = 1
+		<if test="title != null">
+			and title like #{title}
+		</if>
+		<if test="versionNumber != null">
+			and versionNumber = #{versionNumber}
+		</if>
+		<if test="versionAbstract != null">
+			and versionAbstract = #{versionAbstract}
+		</if>
+	</select>
+
+	<!-- 查询未来规划 -->
+	<select id="listVersionLogFuture" resultMap="versionLogAll">
+		select a.*,b.name from version_log a left join roles b on a.createBy = b.number where a.state = 1 and a.versionType = 2
+		<if test="title != null">
+			and title like #{title}
+		</if>
+		<if test="versionNumber != null">
+			and versionNumber = #{versionNumber}
+		</if>
+		<if test="versionAbstract != null">
+			and versionAbstract = #{versionAbstract}
+		</if>
+		order by createTime desc limit #{page.beginRownum},#{page.pageRows}
+	</select>
+
+	<!-- 查询未来规划总行数 -->
+	<select id="selTotalRowsFuture" resultType="int">
+		select count(id) from version_log where state = 1 and versionType = 2
+		<if test="title != null">
+			and title like #{title}
+		</if>
+		<if test="versionNumber != null">
+			and versionNumber = #{versionNumber}
+		</if>
+		<if test="versionAbstract != null">
+			and versionAbstract = #{versionAbstract}
+		</if>
+	</select>
+	
+	<!-- 查询所有版本号 -->
+	<select id="selVesionNumber" resultType="com.entity.VersionLog">
+		select distinct(versionNumber) from version_log where state = 1 order BY versionNumber DESC
+	</select>
+	
+	<!-- 查询最大的版本号 -->
+	<select id="selMaxVesionNumber" resultType="com.entity.VersionLog">
+		select max(distinct(versionNumber)) versionNumber from version_log where state = 1
+	</select>
+	
+	<!-- 添加版本日志 -->
+	<insert id="insertVersionLog" parameterType="com.entity.VersionLog">
+		insert into version_log (versionAbstract,title,content,versionNumber,createTime,createBy,versionType) values (#{versionAbstract},#{title},#{content},#{versionNumber},now(),#{createBy},#{versionType})
+	</insert>
+
+	<!-- DataTabables 分页，搜索  -->
+	<select id="getPageVersionLogList" resultMap="versionLogAll">
+		select a.*,employee.userName,employee.roleId from version_log a left join employee on  a.createBy = employee.roleId
+		<where>
+           a.state = 1
+			<if test="subSQL != null and subSQL != '' ">
+				${subSQL}
+			</if>
+			<if test="search != null and search != ''">
+				and INSTR(ifnull(title,''),'${search}') > 0
+			</if>
+		</where>
+	</select>
+
+	<!-- 删除版本日志 -->
+	<delete id="delVersionLog">
+		update version_log set state = 0 where id in
+		<foreach collection="idlist" item="id" index="index" open="(" close=")"  separator=",">
+			#{id}
+		</foreach>
+	</delete>
+
+	<!-- 根据id查询版本日志 -->
+	<select id="selectVersionLogById" resultType="com.entity.VersionLog">
+		select * from version_log where id = #{id}
+	</select>
+
+	<!-- 修改版本日志 -->
+	<update id="updateVersion" parameterType="com.entity.VersionLog">
+		update version_log set versionAbstract = #{versionAbstract},title = #{title},content = #{content},versionNumber = #{versionNumber},
+		updateTime = now(),updateBy = #{updateBy},versionType = #{versionType} where id = #{id}
+	</update>
+
+</mapper>

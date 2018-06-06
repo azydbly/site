@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mapper.DepartmentMapper">
+
+	<!-- 查询所有部门信息 -->
+	<select id="selAll" resultType="com.entity.Department">
+		select * from department 
+	</select>
+
+	<!-- 根据id查询部门信息 -->
+	<select id="selDept" resultType="com.entity.Department">
+		select * from department where deptNum = #{deptNum}
+	</select>
+
+	<!-- 根据id修改部门信息  -->
+	<update id="updDept">
+		update department set name = #{name},fullName = #{fullName}, pid = #{pid},address = #{address},
+		description = #{description},remark = #{remark},state = #{state} where deptNum = #{deptNum}
+	</update>
+	
+	<!-- 插入新部门 -->
+	<insert id="insDept">
+		insert into department (createDate,deptNum,name,fullName,pid,address,description,remark,state) values
+		(#{createDate},#{deptNum},#{name},#{fullName},#{pid},#{address},#{description},#{remark},#{state})
+	</insert>
+	
+	<!-- 删除部门 -->
+	<delete id="delDept">
+		delete from department where deptNum = #{deptNum}
+	</delete>
+	
+	<!-- 查询最大部门编码 -->
+	<select id="selMaxNum" resultType="int">
+		select max(deptNum) from department
+	</select>
+	
+	<!-- 新增用户时，查询编号跟用户名是否存在 -->
+	<select id="selAllDep" resultType="com.entity.Department">
+		select * from department
+	</select>
+	
+	<!-- 添加部门时，全名称重复验证 -->
+	<select id="selDepartmentByAdd" resultType="com.entity.Department">
+		select fullName from department where fullName = #{fullName}
+	</select>
+	
+	<!-- 修改部门时，全名称重复验证 -->
+	<select id="selDepartmentByUpdate" resultType="com.entity.Department">
+		select fullName from department where id != #{1} and fullName = #{0}
+	</select>
+	
+</mapper>

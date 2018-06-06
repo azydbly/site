@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapper.AttachmentMapper">
+	
+	<select id="selectAttachment" resultType="com.entity.Attachment">
+		select * from attachment
+	</select>
+	
+	<!-- 插入文件 -->
+	<insert id="insAttachment">
+		insert into attachment (createDate,fileName,fileUrl,ordernum,remark) values (#{createDate},#{fileName},#{fileUrl},#{ordernum},#{remark})
+	</insert>
+	
+	<!-- 添加文件时验证名字是否重复 -->
+	<select id="selAttByName" resultType="com.entity.Attachment">
+		select * from attachment where fileName = #{fileName}
+	</select>
+	
+	<!-- 修改文件时验证名字是否重复 -->
+	<select id="selAttByNameId" resultType="com.entity.Attachment">
+		select * from attachment where fileName = #{fileName} and id = #{id}
+	</select>
+	
+	<!-- DataTabables 分页，搜索  -->
+	<select id="getPageFileList" resultType="com.entity.Attachment">
+		select * from attachment
+		<where>
+			<if test="subSQL != null and subSQL != '' ">
+				${subSQL}
+			</if>
+			<if test="search != null and search != ''">
+				and INSTR(ifnull(fileName,''),'${search}') > 0
+			</if>
+		</where>
+	</select>
+	
+</mapper>

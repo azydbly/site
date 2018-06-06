@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapper.AreasMapper">
+
+	<!--查询所有省份-->
+	<select id="getProvince" resultType="com.entity.Areas">
+		select * from areas where pid = 0 and level = 1 and state = 1
+	</select>
+
+	<!--根据省份查询城市-->
+	<select id="getCityByProvince" resultType="com.entity.Areas">
+		select * from areas where pid = #{pid} and level = 2 and state = 1
+	</select>
+
+    <!--根据城市查询区县-->
+	<select id="getCityByCounty" resultType="com.entity.Areas">
+		select * from areas where pid = #{pid} and level = 3 and state = 1
+	</select>
+
+    <!--根据区县查询城镇-->
+    <select id="getTownByCity" resultType="com.entity.Areas">
+        select * from areas where pid = #{pid} and level = 4 and state = 1
+    </select>
+
+    <!--根据城镇查询村庄-->
+    <select id="getVillageByTown" resultType="com.entity.Areas">
+        select * from areas where pid = #{pid} and level = 5 and state = 1
+    </select>
+
+
+    <!-- DataTabables 分页，搜索  -->
+    <select id="getPageAreasList" resultType="com.entity.Areas">
+        select * from areas
+        <where>
+            pid = 0 and LEVEL = 1 and state = 1
+            <if test="subSQL != null and subSQL != '' ">
+                ${subSQL}
+            </if>
+            <if test="search != null and search != ''">
+                and INSTR(ifnull(name,''),'${search}') > 0
+            </if>
+        </where>
+    </select>
+
+</mapper>

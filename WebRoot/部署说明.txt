@@ -1,0 +1,190 @@
+
+后台综合管理系统
+
+使用技术：
+1、后端
+核心框架：Spring Framework
+视图框架：Spring MVC 
+持久层框架：MyBatis
+2、前端
+JS框架：Jquery
+表格插件：dataTables
+表单验证插件：Validator
+弹层组件：Layer
+表单美化插件：ICheck
+树形视图插件：Ztree
+后台管理系统模版：H-ui
+
+
+部署：
+1、具备运行环境：JDK1.7、MySql5+、MyEcplise10+
+2、根据site/src/main/resources/db.properties 配置数据库（根据自己的本机数据库配置进行更改）
+3、先自己创建数据库文件： site/sql/site.sql
+4、用Tomcat等服务器运行site
+5、后台管理系统，账号：数据库中查看， 所有密码都是123456， 测试地址：http://localhost:8080/site(默认登录页面)，第二中登录页面http://localhost:8080/site/login1.jsp
+
+
+项目文件介绍
+
+styles文件夹静态路径
+
+static/	资源
+├── h-ui/				H-ui特有资源
+│    ├── css/						   样式
+│    │    ├── H-ui.reset.css				CSS Reset
+│    │    ├── H-ui.css					H-ui.css
+│    │    ├── H-ui.min.css					H-ui.css(min版)
+│    │    ├── H-ui.ie.css					IE 下兼容css
+│    ├── images/						图片资源 
+│    ├── js/
+│    │    ├── H-ui.js					H-ui核心脚本
+│    │    ├── H-ui.min.js					H-ui核心脚本(min版)
+│   login                               登录页面的css及js文件
+│   yp                                  自己定义的css和js文件 
+
+
+
+Lib/	第三方插件
+├── jquery					   		jQuery类库（v1.9.1）
+├── Hui-iconfont					阿里图标字体库（H-ui定制）
+├── jquery.SuperSlide				幻灯片组件
+├── Validform				    	表单验证插件
+├── jquery.validation				表单验证插件
+├── My97DatePicker				    日期插件
+├── datatables				        表格插件
+├── nprogress				        进度条插件
+├── layer					        layer弹出层插件
+├── laypage					        laypage 翻页插件
+├── html5shiv.js				    html5插件，让低版本IE支持html5元素
+├── DD_belatedPNG_0.0.8a-min.js		解决IE6png透明
+├── swfobject.js					Flash插件
+├── expressInstall.swf  			检查flash插件
+├── respond.min.js					让IE兼容media
+├── datatables                  	表格插件
+├── icheck                      	复选框插件
+├── ueditor							百度富文本
+├── webuploader						天气插件
+├── jquery-easyui                   弹出层
+
+
+images   图片路径
+
+pageList   datatables 分页js效果
+
+
+跟目录下的.ico图片文件是网站的标签图标
+
+
+数据库结构
+
+attachment		上传文件表
+department  	部门表
+employee    	用户表
+function    	所有的功能
+menu        	菜单表
+message			消息表
+operation  		所有非一级菜单对应的功能
+position		招聘职位表
+psnFile			人事档案
+resumemanage	简历、面试表
+role_menu  		角色权限表
+roles       	职位表（角色表）
+salary      	员工薪资表
+training		培训计划表
+version_log     版本日志表
+
+
+功能介绍及使用
+
+1.菜单功能： 添加菜单时，会给非一级菜单菜单查询、增加、修改、删除、提交、导入、导出的功能（插入数据库中），如果添加菜单是一级菜单，不会添加功能选项，以上两种情况均会给
+	roles表中typename为超级管理员的角色添加该菜单的所有权限。删除菜单时，会把对应的菜单功能和角色分配的该菜单删除。
+2.用户（员工）功能： 用户添加时，根据部门和角色添加。
+3.角色管理： 给职位配置权限时，该职位下的角色拥有分配的使用权限，否则不能使用，删除角色时，会把该角色分配的权限一起删除，如果角色下面存在用户则不能删除。
+4.部门管理：删除部门时，如果下存在职位怎不能删除。添加部门时，会选择顶级部门和非顶级部门，顶级部门则是数据库的中某某公司（具体按公司名称显示）
+5.薪资管理：添加薪资时，三级联动获取的角色下面的用户，是根据用户表中的部门编号和角色编号进行匹配，如果该人的薪资已经存在，则添加薪资时不会获取该用户。
+6.招聘管理： 简历管理推荐面试时，管理员（公司的领导会看到所有的面试），如果是登录人是部门领导，则只会看到应聘自己部门职位的面试，不会看到其他部门的。
+7.人事管理：人事档案管理中，如果档案是 起草状态删除是物理删除，人事档案删除（逻辑）是子啊数据库中逻辑删除。
+8.培训管理： 添加计划和修改计划均可添加培训附件，支持下载，修改培训计划时，可以选择重新上传（即删除之前的附件），也可不重新上传（附件还是之前的），也可直接删除附件，不上传附件
+
+注：所有上传的文件地址及：/WEB-INF/site/upload/（安全路径下，可根据自己的需求更改上传地址，配置OSS文件即可上传OSS）
+
+
+Java代码文件注解
+
+实体类
+Areas                               省市区县村庄
+Attachment							文件
+Department							部门
+Employee							员工
+Function							菜单功能
+Menu								菜单
+Opeation							菜单拥有的功能
+Page								分页（使用DataTables没有用到）
+Position							职位发布			
+PsnFile								人事档案
+ResumeManage						（招聘管理）简历、面试
+Role								角色
+RoleLists							获取员工集合
+RoleMenu							角色菜单权限
+Salary								工资
+Training							培训计划
+VersionLog							版本日志
+ZtreeNode							显示部门管理的树形展示
+
+
+控制层
+AttachmentController				文件控制层
+DepartmentController				部门控制层
+EmployeeController					员工控制层
+HireController						招聘管理==》录用管理控制层
+InterviewController					招聘管理==》面试管理控制层
+JumpController						空跳页面控制层
+LoginController						录控制层
+MenuController						菜单控制层
+PositionController					招聘管理==》职位管理控制层
+PsnFileController					人事档案控制层
+ResumeManageController				招聘管理==》简历管理控制层
+RoleController						角色控制层
+RoleMenuController					角色菜单控制层
+SalaryController					员工薪资控制层
+TrainingController					计划管理控制层
+VersionLogController				版本日志控制层
+
+
+other	一些功能页面，可以自己开发
+sql		数据库文件
+styles  静态路径
+
+
+安全路径文件注解
+
+共用文件
+layouts/error						为异常页面（404），其他异常页面也可以自行添加
+layouts/base.jsp					项目路径、静态路径、各标签的引用
+layouts/common/easyUI.jsp			角色配置页面引用
+layouts/common/public.jsp			所有页面引用
+layouts/common/publicList.jsp		list页面引用
+layouts/common/publicLogin.jsp		登录页面引用
+layouts/common/publicMeta.jsp		所有Meta标签
+
+
+项目文件
+site/departmentManagement 			部门管理（部门信息<department>、角色管理<role>）
+site/employee						用户管理（员工管理<user>）
+site/personnel						人事档案管理（档案管理<archives>、档案审批<approval>、档案物理删除<delete>）
+site/recuitment						招聘管理（职位管理<role>、简历管理<resume>、面试管理<interview>、录用管理<employment>）
+site/salary							工资管理（薪资标准管理<standard>、薪资标准审批<approval>、薪资入档管理<entry>）
+site/system							系统管理（文件管理<file>、菜单管理<menu>、版本日志<version>）
+site/train							计划管理（计划列表<plan>、计划审批<examine>、培训计划考核与反馈<feedback>）
+site/upload							上传文件（服务器上显示文件，项目中不显示）
+site/mixed                          H-ui框架的总结页面
+
+没有实现的功能： 
+1.接收发消息，导入、导出。
+2.上传文件时，获取文件类型和大小。
+3.显示上传文件列表，只是简单显示（需要更新）
+4.锁屏没有实现
+
+注意： 1.不建议使用火狐浏览器，测试时使用最新的火狐有事会出现卡顿（正在优化），建议使用其他浏览器。如果出现新的BUG请联系版主（系统主页右侧联系方式）。
+	 2.用邮箱找回密码因为使用是个人邮箱所有发送邮件比较慢，请勿多点（点几次改几次密码），提示显示有两种显示方式。
+	 3.找回密码，先根据用户名在数据库中是否存在，然后根据用户名查找邮箱。

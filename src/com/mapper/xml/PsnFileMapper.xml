@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper SYSTEM "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mapper.PsnFileMapper">
+	<resultMap type="com.entity.PsnFile" id="psnPage">
+		<id property="id" column="id" />
+		<result property="createDate" column="createDate" javaType="java.util.Date" />
+		<result property="fileNum" column="FILENUM" />
+		<result property="state" column="STATE" />
+		<result property="checkState" column="checkState" />
+		<result property="empName" column="EMPNAME" />
+		<result property="sex" column="SEX" />
+		<result property="email" column="EMAIL" />
+		<result property="pphone" column="PPHONE" />
+		<result property="address" column="ADDRESS" />
+		<result property="idCard" column="IDCARD" />
+		<result property="hukouAdrs" column="HUKOUADRS" />
+		<result property="polity" column="POLITY" />
+		<result property="univercity" column="UNIVERCITY" />
+		<result property="major" column="MAJOR" />
+		<result property="education" column="EDUCATION" />
+		<result property="bankName" column="BANKNAME" />
+		<result property="bkCardNum" column="BKCARDNUM" />
+		<result property="checkMan" column="CHECKMAN" />
+		<result property="resume" column="RESUME" />
+		<result property="famRelation" column="FAMRELATION" />
+		<result property="remark" column="REMARK" />
+		<result property="sequNum" column="SEQUNUM" />
+		<result property="fileLocation" column="FILELOCATION" />
+		<result property="url" column="url" />
+		<result property="flag" column="flag" />
+		
+		<association property="department" javaType="com.entity.Department">
+			<result property="name" column="NAME" />
+			<result property="fullName" column="FULLNAME" />
+		</association>
+		<association property="role" javaType="com.entity.Role">
+			<result property="number" column="NUMBER" />
+			<result property="name" column="NAME" />
+		</association>
+		<association property="salary" javaType="com.entity.Salary">
+			<result property="basepay" column="BASEPAY" />
+			<result property="bonus" column="BONUS" />
+			<result property="travel" column="TRAVEL" />
+			<result property="phone" column="PHONE" />
+			<result property="house" column="HOUSE" />
+			<result property="meal" column="MEAL" />
+			<result property="bussiness" column="BUSINESS" />
+			<result property="addwork" column="ADDWORK" />
+			<result property="payroll" column="PAYROLL" />
+		</association> 
+		<association property="employee" javaType="com.entity.Employee">
+			<result property="employeeNum" column="employeeNum" />
+			<result property="userName" column="userName" />
+		</association> 
+	</resultMap>
+	
+	
+	<!-- 显示档案列表 -->
+	<select id="showPsnPage" resultMap="psnPage">
+		select p.id, p.createDate, fileNum, p.state , p.roleid,p.sex, p.email, p.pphone, p.address, p.idcard, p.hukouadrs, p.polity, p.univercity,
+		p.major, p.education,p.bankname, p.bkcardNum, p.checkman,p.resume, p.famrelation, p.remark, p.sequnum, p.fileLocation, p.checkState,
+		p.flag,employee.userName,department.fullName,role.name
+	 	from
+		psnFile p left join roles role on p.roleId = role.number 
+		left join department on p.deptId = department.deptNum
+		left join employee on p.empName = employee.employeeNum
+		<where>
+			 p.flag = 1
+			<if test="subSQL != null and subSQL != '' ">
+				${subSQL}
+			</if>
+			<if test="search != null and search != ''">
+				and INSTR(ifnull(employee.userName,''),'${search}') > 0
+			</if>
+		</where>
+	</select>
+	
+	<!-- 查询最大用户编码 -->
+	<select id="selMaxNum" resultType="int">
+		select max(fileNum) from psnFile
+	</select>
+	
+	<!-- 保存  或者  提交审核  人事档案 -->
+	<insert id="insPsnFile" parameterType="com.entity.PsnFile">
+		insert into psnFile (fileNum, deptId,roleId,empName,idCard,state,sex,email,pphone,address,hukouAdrs,polity,univercity,major,education,bankName,bkCardNum,
+		sequNum,checkMan,resume,famRelation,remark,checkState,createDate,url,fileLocation) values
+		(#{fileNum},#{deptId},#{roleId},#{empName},#{idCard},#{state},#{sex},#{email},#{pphone},#{address},#{hukouAdrs},#{polity},#{univercity},#{major},
+		#{education},#{bankName},#{bkCardNum},#{resume},#{checkMan},#{resume},#{famRelation},#{remark},#{checkState},#{createDate},#{url},#{fileLocation})
+	</insert>
+	
+	<!-- 档案明细，获取修改数据 -->
+	<select id="selFileById" resultMap="psnPage">
+		select p.id,p.fileNum,p.createDate,p.state,p.empname,p.sex,p.email,p.pphone,p.address,p.idcard,p.hukouadrs,p.polity,p.univercity,p.url,
+		p.major,p.education ,p.bankname,p.bkcardNum,p.checkman ,p.resume,p.famrelation,p.remark ,p.sequnum,p.fileLocation,p.checkState ,p.flag,
+		r.name ,r.number,r.state,d.deptNum ,d.name ,d.fullName,d.state,e.userName
+		from
+		psnFile p left join roles r on p.roleId = r.number
+		left join department d on p.deptId = d.deptNum
+		left join employee e on p.empName = e.employeeNum
+		where p.id = #{id}
+	</select>
+	
+	<!-- 修改档案,重新上传附件 -->
+	<update id="updPsnfile">
+		update psnfile set state = #{state},sex = #{sex},email = #{email},pphone = #{pphone},address = #{address},hukouAdrs = #{hukouAdrs},
+		checkState = #{checkState},polity = #{polity},univercity = #{univercity},major = #{major},education = #{education},bankName = #{bankName},
+		bkCardNum = #{bkCardNum},sequNum = #{sequNum},url = #{url},checkMan = #{checkMan},createDate = #{createDate},resume = #{resume},
+		famRelation = #{famRelation},remark = #{remark},fileLocation = #{fileLocation} where id = #{id}
+	</update>
+	
+	<!-- 修改档案,不重新上传附件 -->
+	<update id="updPsnfileNoFile">
+		update psnfile set state = #{state},sex = #{sex},email = #{email},pphone = #{pphone},address = #{address},hukouAdrs = #{hukouAdrs},
+		checkState = #{checkState},polity = #{polity},univercity = #{univercity},major = #{major},education = #{education},bankName = #{bankName},
+		bkCardNum = #{bkCardNum},sequNum = #{sequNum},checkMan = #{checkMan},createDate = #{createDate},resume = #{resume},famRelation = #{famRelation},
+		remark = #{remark} where id = #{id}
+	</update>
+	
+	<!-- 物理删除 -->
+	<update id="delById">
+		update psnfile set flag = 0 where id in
+		<foreach collection="idlist" item="id" index="index" open="(" close=")" separator=",">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</update>
+
+	<!-- 删除 只对起草的有用 -->
+	<delete id="deldteById">
+		delete from psnfile where id in
+		<foreach collection="idlist" item="id" index="index" open="(" close=")" separator=",">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</delete>
+	
+	<!-- 更新档案的审批状态 -->
+	<update id="updateCheck">
+		update psnFile set checkState = #{1} where id = #{0}
+	</update>
+	
+	<!-- 移出简历插件 -->
+	<update id="delAttach">
+		update psnFile set fileLocation = '',url = '' where fileNum = #{fileNum}
+	</update>
+	
+</mapper>

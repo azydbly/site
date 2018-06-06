@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mapper.OperationMapper">
+	
+	<!-- 添加菜单功能  -->
+	<insert id="insertOperation" parameterType="com.entity.Operation">
+		insert into operation (menuname,pid) values (#{menuname},#{pid})
+	</insert>
+	
+	<select id="selectById" resultType="com.entity.Operation">
+		select * from operation where id = #{id}
+	</select>
+	
+	<delete id="delByPid">
+		delete from operation where pid in
+		<foreach collection="idlist" item="pid" index="index" open="(" close=")" separator=",">
+			#{pid,jdbcType=INTEGER}
+		</foreach>
+	</delete>
+	
+	<select id="selectByOperationId" parameterType="com.entity.Operation">
+		select * from operation where id in
+		<foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</select>
+	
+	<!-- 通过pid 查询信息  -->
+	<select id="selectByPid" resultType="com.entity.Operation">
+		select * from operation where pid = #{pid}
+	</select>
+	
+</mapper>

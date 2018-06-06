@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mapper.RoleMapper">
+
+<resultMap type="com.entity.Role" id="selAllRole">	
+	<id property="id" column="id"/>
+	<result property="createDate" javaType="java.util.Date" column="createDate"/>
+	<result property="number" column="number"/>
+	<result property="name" column="name"/>
+	<result property="type" column="type"/>
+	<result property="deptId" column="deptId"/>
+	<result property="description" column="description"/>
+	<result property="remark" column="remark"/>
+	<result property="state" column="state"/>
+	
+	<association property="department" javaType="com.entity.Department">
+		<result property="createDate" javaType="java.util.Date" column="createDate"/>
+		<result property="deptNum" column="deptNum"/>
+		<result property="name" column="name"/>
+		<result property="fullName" column="fullName"/>
+		<result property="pId" column="pId"/>
+		<result property="address" column="address"/>
+		<result property="description" column="description"/>
+		<result property="remark" column="remark"/>
+		<result property="state" column="state"/>
+		<result property="level" column="level"/>
+	</association>
+</resultMap>
+
+	<!-- DataTables 分页、模糊查询  -->
+	<select id="getPageRoleList" resultMap="selAllRole">
+		select r.id ,r.number ,r.name ,r.type,r.createDate ,department.fullName ,r.state from roles r left join department on r.deptId = department.deptNum
+		<where>
+			<if test="subSQL != null and subSQL != '' ">
+				${subSQL}
+			</if>
+			<if test="search != null and search != ''">
+				and INSTR(ifnull(department.fullName,''),'${search}') > 0
+			</if>
+		</where>
+	</select>
+	
+	<select id="selAll" resultType="com.entity.Role">
+		select * from roles
+	</select>
+	
+	<!-- 根据ID查询职位 -->
+	<select id="selById" resultType="com.entity.Role">
+		select * from roles where number = #{number}
+	</select>
+	
+	<!-- 通过id更新职位信息 -->
+	<update id="updRole">
+		update roles set name = #{name},type = #{type},deptId = #{deptId},description = #{description},
+		remark = #{remark},leadership = #{leadership} where id = #{id}		
+	</update>
+	
+	<!-- 通过id更新职位启用停用 -->
+	<update id="updRoleState">
+		update roles set state = #{state} where id = #{id}		
+	</update>
+	
+	<!-- 删除职位 -->
+	<delete id="delById" >
+		delete from roles where id = #{id}
+	</delete>
+	
+	<!-- 插入职位 -->
+	<insert id="insRole">
+		insert into roles (createDate,number,name,type,deptId,description,remark,state,leadership) 
+		values(#{createDate},#{number},#{name},#{type},#{deptId},#{description},#{remark},#{state},#{leadership})
+	</insert>
+	
+	<!-- 批量删除 -->
+	<delete id="delAll">
+		delete from roles where number in
+		<foreach collection="idlist" item="number" index = "index" open="(" close=")"  separator=",">
+			#{number}
+		</foreach>
+	</delete>
+	
+	<!-- 查询最大id -->
+	<select id="selMaxId" resultType="int">
+		select max(id) from roles
+	</select>
+	
+	<!-- 查询最大职位编码 -->
+	<select id="selMaxNum" resultType="int">
+		select max(number) from roles
+	</select>
+	
+	<!-- 查询最小的上级部门编号 -->
+	<select id="selMinLeadership" resultType="int">
+		select min(leadership) from roles
+	</select>
+	
+	<!-- 查询一个部门下的职位 -->
+	<select id="selectAllRoleForDept" resultType="int">
+		select count(name) from roles where deptId = #{deptId}
+	</select>
+	
+	<!-- ajax联动 根据部门查询职位 -->
+	<select id="seelctDept" resultType="com.entity.Role">
+		select * from roles where deptId = #{deptId} and state = 1 
+	</select>
+	
+	<!-- 通过角色number，查询信息，在修改简历时使用 -->
+	<select id="seelctRoleById" resultType="com.entity.Role">
+		select * from roles where number = #{number}
+	</select>
+	
+	<!-- 查询上级领导 -->
+	<select id="seelLeadership" resultType="com.entity.Role">
+		select number,name from roles 
+		<where>
+			type = 1
+			<if test="ttype != 1">
+				 and deptId = #{deptId}
+			</if>
+			<if test="ttype == 1">
+				 and deptId != #{deptId}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 查询超级管理员的id -->
+	<select id="selectForAdmin" resultType="com.entity.Role">
+		select number from roles where typename like '%超级管理员%'
+	</select>
+	
+</mapper>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mapper.SalaryMapper">
+	<resultMap type="com.entity.Salary" id="salaryList">
+		<id property="id" column="id" />
+			<result property="addtime" javaType="java.util.Date" column="addtime" />
+			<result property="employeeId" column="employeeId" />
+			<result property="registrantId" column="registrantId" />
+			<result property="basepay" column="basepay" />
+			<result property="bonus" column="bonus" />
+			<result property="travel" column="travel" />
+			<result property="phone" column="phone" />
+			<result property="house" column="house" />
+			<result property="meal" column="meal" />
+			<result property="bussiness" column="bussiness" />
+			<result property="addwork" column="addwork" />
+			<result property="payroll" column="payroll" />
+			<result property="checkstate" column="checkstate" />
+			<result property="remark" column="remark" />
+		<association property="department" javaType="com.entity.Department">
+			<result property="deptNum" column="deptNum" />
+			<result property="name" column="name" />
+			<result property="fullName" column="fullName" />
+			<result property="pid" column="pid" />
+		</association>
+		<association property="role" javaType="com.entity.Role">
+			<result property="number" column="number" />
+			<result property="name" column="name" />
+			<result property="deptId" column="deptId" />
+		</association>
+		<association property="employee" javaType="com.entity.Employee">
+			<result property="employeeNum" column="employeeNum" />
+			<result property="loginName" column="loginName" />
+			<result property="userName" column="userName" />
+		</association>
+	</resultMap>
+	
+	
+	<!-- 查询所有薪资 -->
+	<select id="getPageSalaryList" resultMap="salaryList">
+		select s.id,s.addtime,s.basepay, s.bonus,s.travel,s.phone,s.meal,s.house,s.bussiness,s.addwork,s.payroll,s.checkstate,
+		employee.userName,department.fullname,role.name
+		from salary s left join roles role on
+		s.roleId = role.number left join department on s.deptId = department.deptNum
+		left join employee on s.employeeId = employee.employeeNum
+		<where>
+			<if test="subSQL != null and subSQL != '' ">
+				${subSQL}
+			</if>
+			<if test="search != null and search != ''">
+				and INSTR(ifnull(role.name,''),'${search}') > 0
+			</if>
+			and s.state = 1
+		</where>
+	</select>
+
+	<!-- 导出员工薪资表 -->
+	<select id="exportSalary" resultMap="salaryList">
+		select s.id,s.basepay,s.bonus,s.travel,s.phone,s.meal,s.house,s.bussiness,s.addwork,s.payroll,employee.userName,department.fullName,role.name
+		from salary s left join roles role on s.roleId = role.number 
+		left join department on s.deptId = department.deptNum
+		left join employee on s.employeeId = employee.employeeNum
+		where s.id in 
+		<foreach collection="idlist" item="id" index="index" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</select>
+	
+	<!-- 查询所有记录 -->
+	<select id="selAll" resultType="com.entity.Salary">
+		select s.id,r.name,s.employeeId from salary s left join roles r on
+		s.roleId = r.number where state = 1 and r.number = #{number}
+	</select>
+		
+	<!-- 查询薪酬详情 -->
+	<select id="selSalaryById" resultMap="salaryList">
+		select s.id,s.addtime,s.basepay,s.bonus,s.travel,s.phone,s.meal,s.house,s.bussiness,s.addwork,s.payroll,s.checkstate,s.registrantId,
+		s.remark,j.name,d.fullName,e.userName
+		from salary s left join roles j on s.roleId = j.number
+		left join department d on s.deptId = d.deptNum
+		left join employee e on s.employeeId = e.employeeNum
+		where s.id = #{id}
+	</select>
+	
+	<!-- 保存更改的薪酬 -->
+	<update id="updSalaryById" parameterType="com.entity.Salary">
+		update salary s set
+		s.basepay = #{basepay},s.travel = #{travel},s.phone = #{phone},
+		s.meal = #{meal},s.house = #{house},s.bussiness = #{bussiness},s.addwork = #{addwork},s.payroll = #{payroll},
+		s.remark = #{remark},s.checkstate = #{checkstate},s.registrantId = #{registrantId} where s.id = #{id}
+	</update>
+	
+	<!-- 查询插入用户所在的部门及职位 -->
+	<select id="selRole" resultType="com.entity.Role">
+		select name from roles where number = #{roleId}
+	</select>
+	
+	<!-- 查询插入用户所在的部门及职位 -->
+	<select id="selDept" resultType="com.entity.Department">
+		select fullName from department where deptNum = #{deptNum}
+	</select>
+	
+	<!-- 通过薪酬标准查询部门 -->
+	<select id="selDepByRoleId" resultType="com.entity.Department">
+	   select d.*  from roles r left join department d on r.deptId = d.deptNum where r.id = #{id}
+	</select>
+	
+	<!-- 插入用户 -->
+	<insert id="insertSalary" parameterType="com.entity.Salary">
+	   insert into salary (employeeId,registrantId,addtime,basepay,bonus,travel,phone,meal,house,
+	   bussiness,addwork,payroll,checkstate,remark,roleId,deptId)
+	   values(#{employeeId},#{registrantId},#{addtime},#{basepay},#{bonus}, #{travel},#{phone},
+	   #{meal},#{house},#{bussiness},#{addwork},#{payroll},#{checkstate},#{remark},#{roleId},#{deptId})
+	</insert>
+	
+	<!-- 根据修改审核状态 -->
+	<update id="updSalary">
+	    update salary set checkstate = #{1} where id = #{0}
+	</update>
+	
+	<!-- 批量删除 -->
+	<update id="deleteAll">
+		update salary set state = 0 where id in
+	   <foreach collection="idlist" item="id" index="index" open="(" close=")" separator=",">
+         #{id}
+      </foreach>
+	</update>
+	
+	<!-- 查询所有工资员工 -->
+	<select id="selId" resultType="com.entity.Salary">
+		select id,employeeNum from salary where state = 1 and id = #{id}
+	</select>
+	
+	<!-- 查询员工薪资 -->
+	<select id="selById" resultType="com.entity.Salary">
+		select * from salary where employeeId = #{employeeId}
+	</select>
+	
+</mapper>

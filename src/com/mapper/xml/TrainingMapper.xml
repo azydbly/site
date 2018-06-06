@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mapper.TrainingMapper">
+
+	<!-- DataTabables 分页，搜索  -->
+	<select id="showPageTrainPlan" resultType="com.entity.Training">
+		select * from training
+		<where>
+			state = 1
+			<if test="subSQL != null and subSQL != '' ">
+				${subSQL}
+			</if>
+			<if test="search != null and search != ''">
+				and INSTR(ifnull(tname,''),'${search}') > 0
+			</if>
+		</where>
+	</select>
+	
+	
+	<!-- 捕捉计划名称 -->
+	<select id="insertCkname" resultType="com.entity.Training">
+		select tname from training where state = 1 and tname = #{tname}
+	</select>
+	
+	
+	<!-- 新增培训起草 -->
+	<insert id="insertSelective" parameterType="com.entity.Training">
+		insert into training(tcreatetime,tname, teacher,begintime,endtime,taim,tpersion,tabstracts,topenions,tfiles,url)
+		values (#{tcreatetime}, #{tname}, #{teacher}, #{begintime}, #{endtime},#{taim}, #{tpersion}, #{tabstracts}, #{topenions}, #{tfiles},#{url})
+	</insert>
+
+
+	<!-- 捕捉计划名称 -->
+	<select id="updateCkname" resultType="com.entity.Training">
+		select tname from training where state = 1 and id != #{1} and tname = #{0}
+	</select>
+
+
+	<!-- 修改 培训计划，更新资料 -->
+	<update id="updateByPrimaryKeySelective" parameterType="com.entity.Training">
+		update training set tname = #{tname}, teacher = #{teacher},begintime = #{begintime},endtime = #{endtime},
+		taim = #{taim},tpersion = #{tpersion},tabstracts = #{tabstracts},topenions = #{topenions},tfeedback = #{tfeedback},
+		tsummary = #{tsummary},tout = #{tout},tfiles = #{tfiles},url = #{url},tview = #{tview} where id = #{id}
+	</update>
+	
+	<!-- 修改 培训计划，不修改资料 -->
+	<update id="updateByPrimaryKeySelectiveNoFile" parameterType="com.entity.Training">
+		update training set tname = #{tname}, teacher = #{teacher},begintime = #{begintime},endtime = #{endtime},
+		taim = #{taim},tpersion = #{tpersion},tabstracts = #{tabstracts},topenions = #{topenions},tfeedback = #{tfeedback},
+		tsummary = #{tsummary},tout = #{tout},tview = #{tview} where id = #{id}
+	</update>
+	
+	<!-- 删除培训起草的页面 -->
+	<update id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		update training set state = 0 where id in
+		<foreach collection="idlist" item="id" index="index" open="(" close=")" separator=",">
+			#{id,jdbcType=INTEGER}
+		</foreach>
+	</update>
+	
+	<!-- 删除培训起草的页面 -->
+	<update id="updateTrainState" parameterType="com.entity.Training">
+		update training set topenions = #{1} where id = #{0}
+	</update>
+
+	<!-- 根据ID查询培训计划 -->
+	<select id="selectByPrimaryKey" resultType="com.entity.Training">
+		select * from training where id = #{id}
+	</select>
+	
+	<!-- 修改培训考核与反馈 -->
+	<update id="updateFeedbackById" parameterType="com.entity.Training">
+		update training set tfeedback = #{tfeedback},tsummary = #{tsummary},tout = #{tout} where id = #{id}
+	</update>
+	
+	<!-- 更新审核计划 -->
+	<update id="updateTrainShenHe" parameterType="com.entity.Training">
+		update training set tview = #{tview}, topenions = #{topenions} where id = #{id}
+	</update>
+	
+	<!-- 移出培训资料 -->
+	<update id="deleteTrainFuJian" parameterType="com.entity.Training">
+		update training set tfiles = '', url = '' where id = #{id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapper.EmployeeMapper">
+	<resultMap type="com.entity.Employee" id="EmpAll">
+		<id property="id" column="id"/>
+		<result property="createDate" column="createDate"/>
+		<result property="employeeNum" column="employeeNum"/>
+		<result property="loginName" column="loginName"/>
+		<result property="loginPassword" column="loginPassword"/>
+		<result property="userName" column="userName"/>
+		<result property="roleId" column="roleId"/>
+		<result property="deptId" column="deptId"/>
+		<result property="idCard" column="idCard"/>
+		<result property="telphone" column="telphone"/>
+		<result property="email" column="email"/>
+		<result property="address" column="address"/>
+		<result property="register" column="register"/>
+		<result property="entryMan" column="entryMan"/>
+		<result property="state" column="state"/>
+		
+		<association property="department" javaType="com.entity.Department">
+			<id property="id" column="id"/>
+			<result property="createDate" javaType="java.util.Date" column="createDate"/>
+			<result property="deptNum" column="deptNum"/>
+			<result property="name" column="name"/>
+			<result property="fullName" column="fullName"/>
+			<result property="pId" column="pId"/>
+			<result property="address" column="address"/>
+			<result property="description" column="description"/>
+			<result property="remark" column="remark"/>
+			<result property="state" column="state"/>
+			<result property="level" column="level"/>
+		</association>
+		
+		<association property="role" javaType="com.entity.Role">
+			<id property="id" column="id"/>
+			<result property="createDate" javaType="java.util.Date" column="createDate"/>
+			<result property="number" column="number"/>
+			<result property="name" column="name"/>
+			<result property="type" column="type"/>
+			<result property="deptId" column="deptId"/>
+			<result property="description" column="description"/>
+			<result property="remark" column="remark"/>
+			<result property="state" column="state"/>
+		</association>
+	</resultMap>
+	
+	<!-- 登录 -->
+	<select id="login" resultType="com.entity.Employee">
+		select * from employee where state = 1 and loginName = #{0} and loginPassword = #{1}   
+	</select>
+	
+	<!-- 更新登录次数 -->
+	<update id="updateRegisterById">
+	 	update employee set register = register + 1 where employeeNum = #{employeeNum}
+	</update> 
+	
+	
+	<!-- DataTabables 分页，搜索  -->
+	<select id="getPageEmployeeList" resultMap="EmpAll">
+		select e.id,e.employeeNum, e.loginName, e.userName,e.createDate,e.state, role.id , role.name, department.id, department.fullName
+	    from employee as e left join department on e.deptId = department.deptNum 
+		left join roles as role on e.roleId = role.number
+		<where>
+			<if test="subSQL != null and subSQL != '' ">
+				${subSQL}
+			</if>
+			<if test="search != null and search != ''">
+				and INSTR(ifnull(e.userName,''),'${search}') > 0
+			</if>
+		</where>
+	</select>
+	
+	
+	<!-- 更新自己的密码 -->
+	<update id="updatePasswordById">
+	 	update employee set loginPassword = #{0}  where employeeNum = #{1}
+	</update> 
+	
+	<!-- 更改头像 -->
+	<update id="updEmployeeById" parameterType="com.entity.Employee">
+		update employee set url = #{url} where employeeNum = #{employeeNum}
+	</update>
+	
+	<!-- 更改个人信息  -->
+	<update id="updEmployeeByIdNoFile" parameterType="com.entity.Employee">
+		update employee e set e.username = #{userName},loginName = #{loginName},
+		e.phone = #{phone},e.email = #{email},e.telphone = #{telphone},
+		e.remark = #{remark} where e.employeeNum = #{employeeNum}
+	</update>
+	
+	<!-- 通过员工编号查询 -->
+	<select id="selEmpById" resultType="com.entity.Employee">
+	  	select * from employee where employeeNum = #{employeeNum}
+	</select>
+	
+	<!-- 通过员工编号查询密码 -->
+	<select id="selPasswordById" resultType="String">
+	  select loginpassword from employee  where employeeNum = #{employeeNum}
+	</select>
+
+	<!-- 根据id查询用户 -->
+	<select id="selById" resultType="com.entity.Employee">
+		select * from employee where employeeNum = #{employeeNum}
+	</select>
+	
+	<!-- 根据职位id查询用户 -->
+	<select id="selByRoleId" resultType="com.entity.Employee">
+		select * from employee where roleId = #{roleId}
+	</select>
+	
+	<!-- 增加用户 -->
+	<insert id="insEmployee">
+		insert into employee (createDate,employeeNum,loginName,userName,loginPassword,
+		roleId,deptId,idCard,telphone,email,address,entryMan) values(#{createDate},
+		#{employeeNum},#{loginName},#{userName},#{loginPassword},#{roleId},#{deptId},#{idCard},
+		#{telphone},#{email},#{address},#{entryMan})
+	</insert>
+	
+	<!-- 删除用户   单条、多条  -->
+	<delete id="delEmployees">
+		delete from employee where id in
+		<foreach collection="idlist" item="id" index="index" open="(" close=")"  separator=",">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<!-- 修改员工信息 -->
+	<update id="updEmployee">
+		update employee set userName = #{userName},roleId = #{roleId},deptId = #{deptId},idCard = #{idCard},telphone = #{telphone},
+		email = #{email},address = #{address} where employeeNum = #{employeeNum}
+	</update>
+	
+	<!-- 查询最大用户编码 -->
+	<select id="selMaxNum" resultType="int">
+		select max(employeeNUM) from employee
+	</select>
+	
+	<!-- 添加查询所有用户名，注册时判断是否重复 -->
+	<select id="selectAllName" resultType="com.entity.Employee">
+		select loginName,email from employee where loginName = #{loginName}
+	</select>
+	
+	<!-- 更新查询所有用户名，注册时判断是否重复 -->
+	<select id="selectAllNameUpdate" resultType="com.entity.Employee">
+		select loginName from employee where loginName = #{0} and employeeNum != #{1}
+	</select>
+	
+	<!-- 添加薪资时，查询一个职位下没有添加薪资的员工 -->
+	<select id="selectRoleName" resultType="com.entity.Employee">
+		select e.userName,e.employeeNum from employee e WHERE e.roleId = #{roleId} and e.employeeNum not in (select employeeId from salary)
+	</select>
+	
+	<!-- 添加档案时时，查询一个职位下没有添加档案的员工 -->
+	<select id="selectRoleNameForPsnFile" resultType="com.entity.Employee">
+		select e.userName,e.employeeNum from employee e WHERE e.roleId = #{roleId} and e.employeeNum not in (select empName from psnfile where state = 0)
+	</select>
+	
+	<!-- 根据职位编号查询该职位下的员工数量 -->
+	<select id="selectCountRoleName" resultType="int">
+		select count(id) from employee where roleId in
+		<foreach collection="idlist" item="roleId" index = "index" open="(" close=")"  separator=",">
+			#{roleId}
+		</foreach>
+	</select>
+	
+	<!-- 修改员工状态 -->
+	<update id="updateEmployeeState" parameterType="com.entity.Employee">
+		update employee set state = #{0} where employeeNum = #{1}
+	</update>
+	
+	<!-- 重置密码 -->
+	<update id="updatePasswordByReset">
+	 	update employee set loginPassword = #{0}  where employeeNum = #{1}
+	</update>
+	
+	<!-- 修改员工状态 -->
+	<update id="updatePasswordByForgot">
+		update employee set loginPassword = #{1} where loginName = #{0}
+	</update>
+	
+</mapper>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapper.ResumeManageMapper">
+	<resultMap type="com.entity.ResumeManage" id="ResumeManageAll">
+		<id property="id" column="id"/>
+		<result property="positionName" column="positionName"/>
+		<result property="positionCode" column="positionCode"/>
+		<result property="positionType" column="positionType"/>
+		<result property="loginPassword" column="loginPassword"/>
+		<result property="username" column="username"/>
+		<result property="sex" column="sex"/>
+		<result property="recruitType" column="recruitType"/>
+		<result property="mail" column="mail"/>
+		<result property="phone" column="phone"/>
+		<result property="homeLocation" column="homeLocation"/>
+		<result property="address" column="address"/>
+		<result property="politicalFace" column="politicalFace"/>
+		<result property="idCard" column="idCard"/>
+		<result property="graduateCollege" column="graduateCollege"/>
+		<result property="educationBackground" column="educationBackground"/>
+		<result property="major" column="major"/>
+		<result property="workExperience" column="workExperience"/>
+		<result property="hopeWages" column="hopeWages"/>
+		<result property="onTheJob" column="onTheJob"/>
+		<result property="graduateNow" column="graduateNow"/>
+		<result property="registDate" column="registDate"/>
+		<result property="personalResume" column="personalResume"/>
+		<result property="recommend" column="recommend"/>
+		<result property="recommendIdea" column="recommendIdea"/>
+		<result property="recommendPerson" column="recommendPerson"/>
+		<result property="recommendDate" column="recommendDate"/>
+		<result property="recommendPersonFirst" column="recommendPersonFirst"/>
+		<result property="recommendDateFirst" column="recommendDateFirst"/>
+		<result property="recommendDescribeFirst" column="recommendDescribeFirst"/>
+		<result property="recommendPersonSecond" column="recommendPersonSecond"/>
+		<result property="recommendDateSecond" column="recommendDateSecond"/>
+		<result property="recommendDescribeSecond" column="recommendDescribeSecond"/>
+		<result property="recommendPersonThird" column="recommendPersonThird"/>
+		<result property="recommendDateThird" column="recommendDateThird"/>
+		<result property="recommendDescribeThird" column="recommendDescribeThird"/>
+		<result property="resumeStatus" column="resumeStatus"/>
+		<result property="decide" column="decide"/>
+		<result property="url" column="url"/>
+		<result property="urlFile" column="urlFile"/>
+		<result property="state" column="state"/>
+		
+		<association property="role" javaType="com.entity.Role">
+			<result property="leadership" column="leadership"/>
+		</association>
+	</resultMap>
+
+
+
+	<!-- 模糊查询 + 分页   面试管理部门主管 -->
+	<select id="getPageResumeList" resultMap="ResumeManageAll">
+	    select rm.id,rm.positionName,rm.positionCode,rm.positionType,rm.username,rm.adddate, rm.sex,rm.recruitType,rm.mail,rm.phone,rm.homeLocation,rm.address,
+	    rm.politicalFace,rm.idCard,rm.graduateCollege,rm.educationBackground,rm.major,rm.workExperience,rm.hopeWages,rm.onTheJob,rm.graduateNow,rm.registDate,
+	    rm.personalResume,rm.recommend,rm.recommendIdea,rm.recommendPerson, rm.recommendDate,rm.recommendPersonFirst,rm.recommendDateFirst,role.leadership,
+	    rm.recommendDescribeFirst,rm.recommendPersonSecond,rm.recommendDateSecond, rm.recommendDescribeSecond,rm.recommendPersonThird,rm.recommendDateThird,
+	    rm.recommendDescribeThird,rm.resumeStatus,rm.state,rm.decide,rm.url 
+	    from resumemanage rm
+	    LEFT JOIN roles role ON rm.positionCode = role.number
+		<where>
+			rm.state = 1
+			<if test="subSQL != null and subSQL != '' ">
+				${subSQL}
+			</if>
+			<if test="search != null and search != ''">
+				and INSTR(ifnull(rm.username,''),'${search}') > 0
+			</if>
+		</where>
+	</select>
+	
+
+	<!-- 更改面试状态 -->
+	<update id="updChangeStatusToOne">
+		update resumemanage set resumeStatus = #{1} where id = #{0}
+	</update>
+
+
+	<!-- 添加 -->
+	<insert id="insertResumeManage" parameterType="com.entity.ResumeManage">
+		insert into resumemanage (addDate,positionName,positionCode,positionType,username,sex,recruitType,mail,phone,homeLocation,address,politicalFace,idCard,
+		graduateCollege,educationBackground,major,workExperience,hopeWages,onTheJob,graduateNow,registDate,personalResume,recommend,recommendPerson,recommendIdea,
+		recommendDate,resumeStatus,url,decide,urlFile,leadership) values 
+		(#{addDate},#{positionName},#{positionCode},#{positionType},#{username},#{sex},#{recruitType},#{mail},#{phone},#{homeLocation},#{address},#{politicalFace},
+		#{idCard},#{graduateCollege},#{educationBackground},#{major},#{workExperience},#{hopeWages},#{onTheJob},#{graduateNow},#{registDate},#{personalResume},
+		#{recommend},#{recommendPerson},#{recommendIdea},#{recommendDate},0,#{url},#{decide},#{urlFile},#{leadership})
+	</insert>
+
+
+	<!-- 保存修改,重新上传附件 -->
+	<update id="updateResumeManage" parameterType="com.entity.ResumeManage">
+		update resumemanage set positionName = #{positionName},positionCode = #{positionCode},positionType = #{positionType},username = #{username},sex = #{sex},
+		recruitType = #{recruitType}, mail = #{mail},phone = #{phone},homeLocation = #{homeLocation},address = #{address},politicalFace = #{politicalFace},
+		idCard = #{idCard},graduateCollege = #{graduateCollege},educationBackground = #{educationBackground},major = #{major},workExperience = #{workExperience},
+		hopeWages = #{hopeWages},onTheJob = #{onTheJob},graduateNow = #{graduateNow},registDate = #{registDate},personalResume = #{personalResume},
+		recommend = #{recommend},recommendPerson = #{recommendPerson},recommendIdea = #{recommendIdea},recommendDate = #{recommendDate},url = #{url},
+		urlFile = #{urlFile},leadership = #{leadership} where id = #{id}
+	</update>
+	
+	
+	<!-- 保存修改,不重新上传附件 -->
+	<update id="updateResumeManageNoFile" parameterType="com.entity.ResumeManage">
+		update resumemanage set positionName = #{positionName},positionCode = #{positionCode},positionType = #{positionType},username = #{username},sex = #{sex},
+		recruitType = #{recruitType}, mail = #{mail},phone = #{phone},homeLocation = #{homeLocation},address = #{address},politicalFace = #{politicalFace},
+		idCard = #{idCard},graduateCollege = #{graduateCollege},educationBackground = #{educationBackground},major = #{major},workExperience = #{workExperience},
+		hopeWages = #{hopeWages},onTheJob = #{onTheJob},graduateNow = #{graduateNow},registDate = #{registDate},personalResume = #{personalResume},
+		recommend = #{recommend},recommendPerson = #{recommendPerson},recommendIdea = #{recommendIdea},recommendDate = #{recommendDate},leadership = #{leadership} where id = #{id}
+	</update>
+
+
+	<!-- 显示详情 -->
+	<select id="selectResumeManageById" resultType="com.entity.ResumeManage">
+		select * from resumemanage where id = #{id}
+	</select>
+
+
+	<!-- 删除:状态删除 (单条、多条) -->
+	<update id="deleteSomeResumeManage">
+	  	update resumemanage set state = 0 where id in
+	  	<foreach collection="idlist" item="id" index="index" open="(" close=")" separator=",">
+        	#{id}
+      	</foreach>
+	</update>
+
+
+	<!-- 根据职位名称查询对象信息 -->
+	<select id="selectRoleByRname" resultType="com.entity.Role">
+		select * from roles where name = #{rname}
+	</select>
+	
+	<!-- 面试结果登记1 -->
+	<update id="updateResumeManageFirst" parameterType="com.entity.ResumeManage">
+		update resumemanage set 
+		recommendPersonFirst = #{recommendPersonFirst},recommendDateFirst = #{recommendDateFirst},
+		recommendDescribeFirst = #{recommendDescribeFirst},resumeStatus = #{resumeStatus}
+		where id = #{id}
+	</update>
+	
+	<!-- 面试结果登记2 -->
+	<update id="updateResumeManageSecond" parameterType="com.entity.ResumeManage">
+		update resumemanage set 
+		recommendPersonSecond = #{recommendPersonSecond},recommendDateSecond = #{recommendDateSecond},
+		recommendDescribeSecond = #{recommendDescribeSecond},resumeStatus = #{resumeStatus}
+		where id = #{id}
+	</update>
+	
+	<!-- 面试结果登记3 -->
+	<update id="updateResumeManageThird" parameterType="com.entity.ResumeManage">
+		update resumemanage set 
+		recommendPersonThird = #{recommendPersonThird},recommendDateThird = #{recommendDateThird},
+		recommendDescribeThird = #{recommendDescribeThird},resumeStatus = #{resumeStatus}
+		where id = #{id}
+	</update>
+	
+	<!-- 面试结果登记 -->
+	<update id="updateResumeManageResult" parameterType="com.entity.ResumeManage">
+		update resumemanage set resumeStatus = #{resumeStatus}, decide = #{decide} where id = #{id}
+	</update>
+	
+	<!-- 根据职位查询部门名称 -->
+	<select id="selectDeptByName" resultType="String">
+		select d.name from department d left join roles r on d.deptNum = r.deptId
+		where r.name = #{rname}
+	</select>
+	
+	<!-- 异步移出简历 -->
+	<update id="removeResumeManage">
+		update resumemanage set url = '', urlFile = '' where id = #{id}
+	</update>
+</mapper>
