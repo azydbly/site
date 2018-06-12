@@ -1,7 +1,8 @@
 <component name="ArtifactManager">
-  <artifact type="exploded-war" name="site:war exploded">
-    <output-path>$PROJECT_DIR$/out/artifacts/site_war_exploded</output-path>
+  <artifact type="exploded-war" name="site:Web exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/site_Web_exploded</output-path>
     <root id="root">
+      <element id="javaee-facet-resources" facet="site/web/Web" />
       <element id="directory" name="WEB-INF">
         <element id="directory" name="classes">
           <element id="module-output" name="site" />
@@ -80,7 +81,6 @@
           <element id="file-copy" path="$PROJECT_DIR$/WebRoot/WEB-INF/lib/standard.jar" />
         </element>
       </element>
-      <element id="javaee-facet-resources" facet="site/web/Web" />
     </root>
   </artifact>
 </component>
